@@ -603,16 +603,19 @@ export class MongoDBPlatform {
       name += "1404";
     } else if (os.release === "14.10") {
       name += "1410-clang";
-    } else if (major_version === 14) {
-      // default for major 14 to 1404
-      name += "1404";
     } else if (os.release === "16.04") {
       name += "1604";
     } else if (os.release === "18.04") {
       name += "1804";
-    } else if (major_version === 16) {
-      // default for major 16 to 1604
+    } else if (major_version >= 18) {
+      // default for major 18~future to 1804
+      name += "1804";
+    } else if (major_version >= 16) {
+      // default for major 16~17 to 1604
       name += "1604";
+    } else if (major_version >= 14) {
+      // default for major 14~15 to 1404
+      name += "1404";
     } else {
       // this needs to default to legacy release, this is a BUG
       this.debug("selecting default Ubuntu release 1404");

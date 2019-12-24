@@ -9,7 +9,7 @@ var getos = require('getos');
 var url = require('url');
 var semver = require('semver');
 var decompress = require('decompress');
-var request = require('request-promise');
+var request = require('request');
 var md5File = require('md5-file');
 var DOWNLOAD_URI = "https://fastdl.mongodb.org";
 var MONGODB_VERSION = "latest";
@@ -243,7 +243,11 @@ var MongoDBDownload = /** @class */ (function () {
         var _this = this;
         return new Promise(function (resolve, reject) {
             _this.getDownloadURIMD5().then(function (md5URL) {
-                request(md5URL).then(function (signatureContent) {
+                request(md5URL, function (e, response, signatureContent) {
+                    if (e) {
+                        console.error('unable to get signature content', e);
+                        return reject(e);
+                    }
                     _this.debug("getDownloadMD5Hash content: " + signatureContent);
                     var signatureMatch = signatureContent.match(/([^\s]*)(\s*|$)/);
                     var signature = signatureMatch[1];
@@ -254,9 +258,6 @@ var MongoDBDownload = /** @class */ (function () {
                         _this.debug('@getMD5HashOnline erorr', e);
                         reject();
                     });
-                }, function (e) {
-                    console.error('unable to get signature content', e);
-                    reject(e);
                 });
             });
         });

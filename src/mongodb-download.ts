@@ -7,7 +7,7 @@ const getos: any = require('getos');
 const url: any = require('url');
 const semver: any = require('semver');
 const decompress: any = require('decompress');
-const request: any = require('request-promise');
+const request: any = require('request');
 const md5File: any = require('md5-file');
 
 const DOWNLOAD_URI: string = "https://fastdl.mongodb.org";
@@ -272,7 +272,11 @@ export class MongoDBDownload {
   getMD5HashOnline(): Promise<string> {
     return new Promise<string>((resolve, reject) => {
       this.getDownloadURIMD5().then((md5URL) => {
-        request(md5URL).then((signatureContent: string) => {
+        request(md5URL, (e: any, response: any, signatureContent: string) => {
+          if (e) {
+            console.error('unable to get signature content', e);
+            return reject(e);
+          }
           this.debug(`getDownloadMD5Hash content: ${signatureContent}`);
           let signatureMatch: string[] = signatureContent.match(/([^\s]*)(\s*|$)/);
           let signature: string = signatureMatch[1];
@@ -283,9 +287,6 @@ export class MongoDBDownload {
             this.debug('@getMD5HashOnline erorr', e);
             reject();
           });
-        }, (e: any) => {
-          console.error('unable to get signature content', e);
-          reject(e);
         });
       })
     });
